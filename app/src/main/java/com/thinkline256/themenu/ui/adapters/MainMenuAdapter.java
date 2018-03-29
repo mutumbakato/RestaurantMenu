@@ -1,4 +1,4 @@
-package com.thinkline256.themenu.ui;
+package com.thinkline256.themenu.ui.adapters;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -8,21 +8,21 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.thinkline256.themenu.R;
-import com.thinkline256.themenu.ui.MainMenuFragment.OnListFragmentInteractionListener;
-import com.thinkline256.themenu.ui.dummy.DummyContent.DummyItem;
+import com.thinkline256.themenu.data.models.Category;
+import com.thinkline256.themenu.ui.fragments.MainMenuFragment.OnListFragmentInteractionListener;
 
 import java.util.List;
 
 /**
- * {@link RecyclerView.Adapter} that can display a {@link DummyItem} and makes a call to the
+ * {@link RecyclerView.Adapter} that can display a {@link Category} and makes a call to the
  * specified {@link OnListFragmentInteractionListener}.
  */
 public class MainMenuAdapter extends RecyclerView.Adapter<MainMenuAdapter.ViewHolder> {
 
-    private final List<DummyItem> mValues;
+    private List<Category> mValues;
     private final OnListFragmentInteractionListener mListener;
 
-    public MainMenuAdapter(List<DummyItem> items, OnListFragmentInteractionListener listener) {
+    public MainMenuAdapter(List<Category> items, OnListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
     }
@@ -36,11 +36,9 @@ public class MainMenuAdapter extends RecyclerView.Adapter<MainMenuAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-
         holder.mItem = mValues.get(position);
-        holder.mIdView.setText(mValues.get(position).content);
-        holder.mContentView.setText(mValues.get(position).details);
-        holder.mIcon.setImageResource(mValues.get(position).icon);
+        holder.mIdView.setText(mValues.get(position).getName());
+        holder.mContentView.setText(mValues.get(position).getDescription());
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -61,7 +59,7 @@ public class MainMenuAdapter extends RecyclerView.Adapter<MainMenuAdapter.ViewHo
         public final TextView mIdView;
         public final TextView mContentView;
         public final ImageView mIcon;
-        public DummyItem mItem;
+        public Category mItem;
 
         public ViewHolder(View view) {
             super(view);
@@ -76,4 +74,9 @@ public class MainMenuAdapter extends RecyclerView.Adapter<MainMenuAdapter.ViewHo
             return super.toString() + " '" + mContentView.getText() + "'";
         }
     }
+    public void updateData(List<Category> categories) {
+        mValues = categories;
+        notifyDataSetChanged();
+    }
+
 }

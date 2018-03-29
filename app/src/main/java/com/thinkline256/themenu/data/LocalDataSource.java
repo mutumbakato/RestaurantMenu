@@ -5,4 +5,5 @@ package com.thinkline256.themenu.data;
  */
 
 public class LocalDataSource {
+
 }

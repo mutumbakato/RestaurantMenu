@@ -1,4 +1,4 @@
-package com.thinkline256.themenu.ui;
+package com.thinkline256.themenu.ui.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -10,8 +10,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.thinkline256.themenu.R;
-import com.thinkline256.themenu.ui.dummy.DummyContent;
-import com.thinkline256.themenu.ui.dummy.DummyContent.DummyItem;
+import com.thinkline256.themenu.data.DataSource;
+import com.thinkline256.themenu.data.models.Category;
+import com.thinkline256.themenu.ui.adapters.MainMenuAdapter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A fragment representing a list of Items.
@@ -19,10 +23,11 @@ import com.thinkline256.themenu.ui.dummy.DummyContent.DummyItem;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class MainMenuFragment extends Fragment {
+public class MainMenuFragment extends Fragment implements DataSource.ListCategoriesCallBacks {
 
     private static final String ARG_COLUMN_COUNT = "column-count";
     private OnListFragmentInteractionListener mListener;
+    private MainMenuAdapter adapter;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -43,6 +48,7 @@ public class MainMenuFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        adapter = new MainMenuAdapter(new ArrayList<Category>(), mListener);
     }
 
     @Override
@@ -53,7 +59,7 @@ public class MainMenuFragment extends Fragment {
         Context context = view.getContext();
         RecyclerView recyclerView = view.findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        recyclerView.setAdapter(new MainMenuAdapter(DummyContent.ITEMS, mListener));
+        recyclerView.setAdapter(adapter);
         return view;
     }
 
@@ -75,17 +81,17 @@ public class MainMenuFragment extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
+    @Override
+    public void onLoad(List<Category> categories) {
+        adapter.updateData(categories);
+    }
+
+    @Override
+    public void onFail(String message) {
+
+    }
+
     public interface OnListFragmentInteractionListener {
-        void onListFragmentInteraction(DummyItem item);
+        void onListFragmentInteraction(Category item);
     }
 }

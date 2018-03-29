@@ -1,7 +1,9 @@
 package com.thinkline256.themenu.data;
 
-import android.view.MenuItem;
+import com.thinkline256.themenu.data.models.Category;
+import com.thinkline256.themenu.data.models.MenuItem;
 import com.thinkline256.themenu.data.models.OrderItem;
+
 import java.util.List;
 
 /**
@@ -10,13 +12,46 @@ import java.util.List;
 
 public interface DataSource {
 
-    interface listMenuCallBacks {
-        void onLoad(List<MenuItem> items);
-        void onFaile(String message);
+    interface ListMenuCallBacks {
+        void onLoad(List<MenuItem> menu);
+
+        void onFail(String message);
     }
 
-    interface orderUpdateListener {
+    interface ListCategoriesCallBacks {
+        void onLoad(List<Category> categories);
+
+        void onFail(String message);
+    }
+
+    interface ListOrderCallBacks {
+        void onLoad(List<OrderItem> orders);
+
+        void onFail(String message);
+    }
+
+    interface onOrderUpdateListener {
         void onUpdate(List<OrderItem> orderItems);
     }
+
+    void getCategories(ListCategoriesCallBacks callBacks);
+
+    void getMenu(ListMenuCallBacks callBacks);
+
+    void getOrders(ListOrderCallBacks callBacks);
+
+    void addToOrder(MenuItem item);
+
+    void removeFromOrders(MenuItem item);
+
+    void addMenuItem(MenuItem item);
+
+    void addCategory(Category category);
+
+    void updateMenuItem(MenuItem item);
+
+    void deleteMenuItem();
+
+    void notifyMenuUpdates(ListOrderCallBacks callBacks);
 
 }
