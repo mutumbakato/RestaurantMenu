@@ -2,6 +2,7 @@ package com.thinkline256.themenu.ui.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -11,6 +12,8 @@ import android.view.ViewGroup;
 
 import com.thinkline256.themenu.R;
 import com.thinkline256.themenu.data.DataSource;
+import com.thinkline256.themenu.data.Repository;
+import com.thinkline256.themenu.data.DataUtils;
 import com.thinkline256.themenu.data.models.Category;
 import com.thinkline256.themenu.ui.adapters.MainMenuAdapter;
 
@@ -28,12 +31,15 @@ public class MainMenuFragment extends Fragment implements DataSource.ListCategor
     private static final String ARG_COLUMN_COUNT = "column-count";
     private OnListFragmentInteractionListener mListener;
     private MainMenuAdapter adapter;
+    private Repository repo;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
+
     public MainMenuFragment() {
+
     }
 
     @SuppressWarnings("unused")
@@ -49,6 +55,7 @@ public class MainMenuFragment extends Fragment implements DataSource.ListCategor
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         adapter = new MainMenuAdapter(new ArrayList<Category>(), mListener);
+        repo = DataUtils.getRepository();
     }
 
     @Override
@@ -58,11 +65,17 @@ public class MainMenuFragment extends Fragment implements DataSource.ListCategor
         // Set the adapter
         Context context = view.getContext();
         RecyclerView recyclerView = view.findViewById(R.id.list);
+
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
         recyclerView.setAdapter(adapter);
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        repo.getCategories(this);
+    }
 
     @Override
     public void onAttach(Context context) {
@@ -88,7 +101,7 @@ public class MainMenuFragment extends Fragment implements DataSource.ListCategor
 
     @Override
     public void onFail(String message) {
-
+        Snackbar.make(getView(), message, Snackbar.LENGTH_LONG).show();
     }
 
     public interface OnListFragmentInteractionListener {

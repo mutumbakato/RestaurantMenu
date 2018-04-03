@@ -14,7 +14,8 @@
         android:alpha="0.3"
         android:rotation="45"
         android:scaleType="fitEnd"
-        android:src="@drawable/wall"/>
+        android:src="@drawable/wall"
+        android:visibility="gone"/>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"

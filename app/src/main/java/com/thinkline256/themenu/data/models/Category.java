@@ -9,15 +9,17 @@ public class Category {
     private String id;
     private String name;
     private String description;
+    private int image;
 
     public Category() {
 
     }
 
-    public Category(String id, String name, String description) {
+    public Category(String id, String name, String description, int image) {
         this.id = id;
         this.name = name;
         this.description = description;
+        this.image = image;
     }
 
     public String getId() {
@@ -33,5 +35,8 @@ public class Category {
     }
 
 
+    public int getImage() {
+        return image;
+    }
 }
 

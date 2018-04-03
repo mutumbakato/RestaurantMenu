@@ -4,8 +4,9 @@ package com.thinkline256.themenu.data.models;
  * Created by cato on 3/28/18.
  */
 
-public class MenuItem {
+public class RestaurantMenuItem {
 
+    private String id;
     private String name;
     private String description;
     private String category;
@@ -13,11 +14,12 @@ public class MenuItem {
     private float price;
     private boolean available;
 
-    public MenuItem() {
+    public RestaurantMenuItem() {
 
     }
 
-    public MenuItem(String name, String description, String category, String type, float price, boolean available) {
+    public RestaurantMenuItem(String id, String name, String description, String category, String type, float price, boolean available) {
+        this.id = id;
         this.name = name;
         this.description = description;
         this.category = category;
@@ -44,6 +46,10 @@ public class MenuItem {
 
     public float getPrice() {
         return price;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public boolean isAvailable() {

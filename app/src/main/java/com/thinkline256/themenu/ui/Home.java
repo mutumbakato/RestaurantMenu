@@ -1,5 +1,6 @@
 package com.thinkline256.themenu.ui;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
@@ -16,25 +17,32 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.thinkline256.themenu.R;
+import com.thinkline256.themenu.data.DataUtils;
+import com.thinkline256.themenu.data.Repository;
+import com.thinkline256.themenu.data.models.Category;
+import com.thinkline256.themenu.data.models.RestaurantMenuItem;
 import com.thinkline256.themenu.ui.fragments.MainMenuFragment;
 import com.thinkline256.themenu.ui.fragments.MenuItemsFragment;
-import com.thinkline256.themenu.ui.dummy.DummyContent;
-import com.thinkline256.themenu.ui.dummy.MenuItemContent;
+import com.thinkline256.themenu.ui.fragments.OrderFragment;
 
 public class Home extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener,
         MainMenuFragment.OnListFragmentInteractionListener,
-        MenuItemsFragment.OnListFragmentInteractionListener {
+        MenuItemsFragment.OnListFragmentInteractionListener,
+        OrderFragment.OnFragmentInteractionListener {
 
     private BottomSheetBehavior orderView;
+    private Repository repository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        repository = DataUtils.getRepository();
         setContentView(R.layout.activity_home);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
-        orderView = BottomSheetBehavior.from(findViewById(R.id.order_bottom_sheet));
+        orderView = BottomSheetBehavior.from(findViewById(R.id.order_frame));
+
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
 
@@ -56,12 +64,13 @@ public class Home extends AppCompatActivity implements
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        findViewById(R.id.order_bottom_sheet).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.order_frame).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 orderView.setState(BottomSheetBehavior.STATE_EXPANDED);
             }
         });
+
         orderView.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -108,23 +117,41 @@ public class Home extends AppCompatActivity implements
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
+        if (id == R.id.nav_menu) {
+
+        } else if (id == R.id.nav_dashboard) {
+            DashBoard.start(this);
+        }
+
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
     @Override
-    public void onListFragmentInteraction(DummyContent.DummyItem item) {
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.menu_frame, MenuItemsFragment.newInstance(item.id, item.content)).addToBackStack(null).commit();
+    public void onListFragmentInteraction(Category item) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .add(R.id.menu_frame, MenuItemsFragment.newInstance(item.getId(), item.getName()))
+                .addToBackStack("")
+                .commit();
     }
 
     @Override
-    public void onListFragmentInteraction(MenuItemContent.DummyMenuItem item) {
-
+    public void onListFragmentInteraction(RestaurantMenuItem item, boolean isChecked) {
+//        MenuFormActivity.start(this, item.getId(), item.getCategory());
+        if (isChecked) {
+            repository.addToOrder(item);
+        } else {
+            repository.removeFromOrders(item);
+        }
     }
 
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
+    }
 }

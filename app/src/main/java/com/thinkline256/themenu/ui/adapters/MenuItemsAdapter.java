@@ -4,27 +4,22 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.thinkline256.themenu.R;
+import com.thinkline256.themenu.data.models.RestaurantMenuItem;
 import com.thinkline256.themenu.ui.fragments.MenuItemsFragment.OnListFragmentInteractionListener;
-import com.thinkline256.themenu.ui.dummy.DummyContent.DummyItem;
-import com.thinkline256.themenu.ui.dummy.MenuItemContent;
 
 import java.util.List;
 
-/**
- * {@link RecyclerView.Adapter} that can display a {@link DummyItem} and makes a call to the
- * specified {@link OnListFragmentInteractionListener}.
- * TODO: Replace the implementation with code for your data type.
- */
 public class MenuItemsAdapter extends RecyclerView.Adapter<MenuItemsAdapter.ViewHolder> {
 
-    private final List<MenuItemContent.DummyMenuItem> mValues;
+    private List<RestaurantMenuItem> mItems;
     private final OnListFragmentInteractionListener mListener;
 
-    public MenuItemsAdapter(List<MenuItemContent.DummyMenuItem> items, OnListFragmentInteractionListener listener) {
-        mValues = items;
+    public MenuItemsAdapter(List<RestaurantMenuItem> items, OnListFragmentInteractionListener listener) {
+        mItems = items;
         mListener = listener;
     }
 
@@ -37,17 +32,20 @@ public class MenuItemsAdapter extends RecyclerView.Adapter<MenuItemsAdapter.View
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.mItem = mValues.get(position);
-        holder.mIdView.setText(mValues.get(position).content);
-        holder.mContentView.setText(mValues.get(position).id);
-
+        holder.mItem = mItems.get(position);
+        holder.mNameView.setText(mItems.get(position).getName());
+        holder.mPriceView.setText(com.thinkline256.themenu.utils.Currency.format(mItems.get(position).getPrice()));
+        holder.mCheckBox.setChecked(mItems.get(position).isAvailable());
+        holder.mCheckBox.setChecked(holder.isChecked);
+        holder.mCheckBox.setClickable(false);
+        holder.mCheckBox.setFocusable(false);
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (null != mListener) {
-                    // Notify the active callbacks interface (the activity, if the
-                    // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentInteraction(holder.mItem);
+                    holder.isChecked = !holder.isChecked;
+                    holder.mCheckBox.setChecked(holder.isChecked);
+                    mListener.onListFragmentInteraction(holder.mItem, holder.isChecked);
                 }
             }
         });
@@ -55,25 +53,33 @@ public class MenuItemsAdapter extends RecyclerView.Adapter<MenuItemsAdapter.View
 
     @Override
     public int getItemCount() {
-        return mValues.size();
+        return mItems.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
-        public final TextView mIdView;
-        public final TextView mContentView;
-        public MenuItemContent.DummyMenuItem mItem;
+        public final TextView mNameView;
+        public final TextView mPriceView;
+        public RestaurantMenuItem mItem;
+        public final CheckBox mCheckBox;
+        public boolean isChecked = false;
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mIdView = (TextView) view.findViewById(R.id.id);
-            mContentView = (TextView) view.findViewById(R.id.content);
+            mNameView = (TextView) view.findViewById(R.id.item_name);
+            mPriceView = (TextView) view.findViewById(R.id.item_price);
+            mCheckBox = view.findViewById(R.id.item_check);
         }
 
         @Override
         public String toString() {
-            return super.toString() + " '" + mContentView.getText() + "'";
+            return super.toString() + " '" + mNameView.getText() + "'";
         }
+    }
+
+    public void updateData(List<RestaurantMenuItem> items) {
+        mItems = items;
+        notifyDataSetChanged();
     }
 }

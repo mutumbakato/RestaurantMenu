@@ -17,7 +17,7 @@
 
     <include layout="@layout/content_home"/>
 
-    <include layout="@layout/order_layout"/>
+    <include layout="@layout/order_container"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
@@ -27,4 +27,5 @@
         android:layout_margin="@dimen/fab_margin"
         android:visibility="gone"
         app:srcCompat="@drawable/ic_action_next"/>
+
 </android.support.design.widget.CoordinatorLayout>

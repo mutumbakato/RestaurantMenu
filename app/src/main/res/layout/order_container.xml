@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/order_frame"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:behavior_hideable="false"
+    app:behavior_peekHeight="@dimen/sheet_pip"
+    app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
+    <fragment
+        android:id="@+id/order_fragment"
+        android:name="com.thinkline256.themenu.ui.fragments.OrderFragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+</FrameLayout>

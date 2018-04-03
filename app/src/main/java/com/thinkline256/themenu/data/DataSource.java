@@ -1,8 +1,8 @@
 package com.thinkline256.themenu.data;
 
 import com.thinkline256.themenu.data.models.Category;
-import com.thinkline256.themenu.data.models.MenuItem;
-import com.thinkline256.themenu.data.models.OrderItem;
+import com.thinkline256.themenu.data.models.RestaurantMenuItem;
+import com.thinkline256.themenu.data.models.Order;
 
 import java.util.List;
 
@@ -12,8 +12,20 @@ import java.util.List;
 
 public interface DataSource {
 
+    interface MenuCallback {
+        void onSuccess(RestaurantMenuItem restaurantMenuItem);
+
+        void onFail(String message);
+    }
+
+    interface CategoryCallback {
+        void onSuccess(Category category);
+
+        void onFail(String message);
+    }
+
     interface ListMenuCallBacks {
-        void onLoad(List<MenuItem> menu);
+        void onLoad(List<RestaurantMenuItem> menu);
 
         void onFail(String message);
     }
@@ -25,33 +37,41 @@ public interface DataSource {
     }
 
     interface ListOrderCallBacks {
-        void onLoad(List<OrderItem> orders);
+        void onLoad(List<Order> orders);
 
         void onFail(String message);
     }
 
-    interface onOrderUpdateListener {
-        void onUpdate(List<OrderItem> orderItems);
+    interface OrderUpdateListener {
+        void onUpdate(List<Order> orders);
     }
 
     void getCategories(ListCategoriesCallBacks callBacks);
 
-    void getMenu(ListMenuCallBacks callBacks);
+    void getMenu(String category, ListMenuCallBacks callBacks);
 
     void getOrders(ListOrderCallBacks callBacks);
 
-    void addToOrder(MenuItem item);
+    void addToOrder(RestaurantMenuItem item);
 
-    void removeFromOrders(MenuItem item);
+    void removeFromOrders(RestaurantMenuItem item);
 
-    void addMenuItem(MenuItem item);
+    void addCategory(Category category, CategoryCallback callback);
 
-    void addCategory(Category category);
+    void updateCategory(Category category);
 
-    void updateMenuItem(MenuItem item);
+    void deleteCategory(Category category);
 
-    void deleteMenuItem();
+    void addMenuItem(RestaurantMenuItem item, MenuCallback callback);
 
-    void notifyMenuUpdates(ListOrderCallBacks callBacks);
+    void getMenuItem(String id, String category, MenuCallback callback);
+
+    void updateMenuItem(RestaurantMenuItem item);
+
+    void deleteMenuItem(RestaurantMenuItem id);
+
+    void setOrderListener(OrderUpdateListener listener);
+
+    void commitCurrentOrder();
 
 }

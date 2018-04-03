@@ -39,6 +39,7 @@ public class MainMenuAdapter extends RecyclerView.Adapter<MainMenuAdapter.ViewHo
         holder.mItem = mValues.get(position);
         holder.mIdView.setText(mValues.get(position).getName());
         holder.mContentView.setText(mValues.get(position).getDescription());
+        holder.mIcon.setImageResource(mValues.get(position).getImage());
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -55,6 +56,7 @@ public class MainMenuAdapter extends RecyclerView.Adapter<MainMenuAdapter.ViewHo
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
+
         public final View mView;
         public final TextView mIdView;
         public final TextView mContentView;
@@ -74,6 +76,7 @@ public class MainMenuAdapter extends RecyclerView.Adapter<MainMenuAdapter.ViewHo
             return super.toString() + " '" + mContentView.getText() + "'";
         }
     }
+
     public void updateData(List<Category> categories) {
         mValues = categories;
         notifyDataSetChanged();
