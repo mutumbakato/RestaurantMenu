@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -26,6 +27,7 @@ public class OrderFragment extends Fragment implements DataSource.OrderUpdateLis
     private LinearLayout orderItemsHolder;
     private TextView orderPrice;
     private Repository repository;
+    private Button sendOrder;
 
     public OrderFragment() {
         // Required empty public constructor
@@ -66,6 +68,17 @@ public class OrderFragment extends Fragment implements DataSource.OrderUpdateLis
         repository.setOrderListener(null);
     }
 
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Order order = repository.getCurrentOrder();
+        if (order != null) {
+            showItems(order.getItems());
+            showTotal(order.getItems());
+        }
+    }
+
     @Override
     public void onUpdate(List<Order> orders) {
         for (Order order : orders) {
@@ -87,8 +100,10 @@ public class OrderFragment extends Fragment implements DataSource.OrderUpdateLis
     }
 
     private void showItems(List<RestaurantMenuItem> items) {
+
         orderItemsHolder.removeAllViews();
         orderPrice.setText("0/=");
+
         for (RestaurantMenuItem item : items) {
             TextView textView = new TextView(getContext());
             textView.setText(String.format("%s - @ - %s", item.getName(), Currency.format(item.getPrice())));

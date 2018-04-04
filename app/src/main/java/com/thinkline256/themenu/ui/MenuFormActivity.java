@@ -1,5 +1,6 @@
 package com.thinkline256.themenu.ui;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,8 +16,8 @@ import android.widget.Toast;
 
 import com.thinkline256.themenu.R;
 import com.thinkline256.themenu.data.DataSource;
-import com.thinkline256.themenu.data.Repository;
 import com.thinkline256.themenu.data.DataUtils;
+import com.thinkline256.themenu.data.Repository;
 import com.thinkline256.themenu.data.models.RestaurantMenuItem;
 import com.thinkline256.themenu.utils.Currency;
 
@@ -24,7 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class MenuFormActivity extends AppCompatActivity implements DataSource.MenuCallback {
+public class MenuFormActivity extends AppCompatActivity
+        implements DataSource.MenuCallback {
 
     private TextInputEditText vName;
     private TextInputEditText vPrice;
@@ -35,7 +37,6 @@ public class MenuFormActivity extends AppCompatActivity implements DataSource.Me
 
     private boolean isAvailable = false;
     private List<TextInputEditText> inputs;
-
     private Repository repository;
     private String mItemId;
     private String mCategoryId;
@@ -47,7 +48,6 @@ public class MenuFormActivity extends AppCompatActivity implements DataSource.Me
         mItemId = getIntent().getStringExtra("id");
         mCategoryId = getIntent().getStringExtra("category");
         repository = DataUtils.getRepository();
-
         setContentView(R.layout.activity_menu_form);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -61,7 +61,6 @@ public class MenuFormActivity extends AppCompatActivity implements DataSource.Me
         vType = findViewById(R.id.menu_type);
         vCategory = findViewById(R.id.menu_category);
         vAvailable = findViewById(R.id.menu_available);
-
         vAvailable.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
@@ -75,6 +74,7 @@ public class MenuFormActivity extends AppCompatActivity implements DataSource.Me
                 saveItem();
             }
         });
+
         inputs = new ArrayList<>();
         inputs.add(vName);
         inputs.add(vPrice);
@@ -92,6 +92,9 @@ public class MenuFormActivity extends AppCompatActivity implements DataSource.Me
     }
 
     private void saveItem() {
+        final ProgressDialog progress = new ProgressDialog(this);
+        progress.setMessage("Saving item");
+        progress.show();
 
         String mName = vName.getText().toString().trim();
         String mPrice = vPrice.getText().toString().trim();
@@ -102,24 +105,26 @@ public class MenuFormActivity extends AppCompatActivity implements DataSource.Me
         if (formIsValid()) {
             if (isNew()) {
                 RestaurantMenuItem restaurantMenuItem =
-                        new RestaurantMenuItem(UUID.randomUUID().toString(), mName, mDescription, mCategory, mType, Float.parseFloat(mPrice), isAvailable);
+                        new RestaurantMenuItem(UUID.randomUUID().toString(), mName, mDescription, mCategory, mType, Float.parseFloat(mPrice), isAvailable, 1);
                 repository.addMenuItem(restaurantMenuItem, new DataSource.MenuCallback() {
                     @Override
                     public void onSuccess(RestaurantMenuItem item) {
+                        progress.dismiss();
                         Toast.makeText(MenuFormActivity.this, "Item saved successfully!", Toast.LENGTH_LONG).show();
                         finish();
                     }
 
                     @Override
                     public void onFail(String message) {
+                        progress.dismiss();
                         Toast.makeText(MenuFormActivity.this, "Failed to save Item.", Toast.LENGTH_LONG).show();
-
                     }
                 });
             } else {
                 RestaurantMenuItem edited = new RestaurantMenuItem(item.getId(), mName, mDescription,
-                        mCategory, mType, Float.parseFloat(mPrice), isAvailable);
+                        mCategory, mType, Float.parseFloat(mPrice), isAvailable, 1);
                 repository.updateMenuItem(edited);
+                progress.dismiss();
                 finish();
             }
         }
@@ -154,6 +159,8 @@ public class MenuFormActivity extends AppCompatActivity implements DataSource.Me
     @Override
     public void onSuccess(RestaurantMenuItem restaurantMenuItem) {
         item = restaurantMenuItem;
+        if (restaurantMenuItem == null)
+            return;
         vName.setText(restaurantMenuItem.getName());
         vPrice.setText(Currency.format(restaurantMenuItem.getPrice()));
         vDescription.setText(restaurantMenuItem.getDescription());

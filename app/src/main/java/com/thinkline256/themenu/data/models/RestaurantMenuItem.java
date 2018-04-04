@@ -13,12 +13,13 @@ public class RestaurantMenuItem {
     private String type;
     private float price;
     private boolean available;
+    private float quantity;
 
     public RestaurantMenuItem() {
 
     }
 
-    public RestaurantMenuItem(String id, String name, String description, String category, String type, float price, boolean available) {
+    public RestaurantMenuItem(String id, String name, String description, String category, String type, float price, boolean available, float quantity) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -26,6 +27,7 @@ public class RestaurantMenuItem {
         this.type = type;
         this.price = price;
         this.available = available;
+        this.quantity = quantity;
     }
 
     public String getName() {
@@ -48,6 +50,7 @@ public class RestaurantMenuItem {
         return price;
     }
 
+
     public String getId() {
         return id;
     }
@@ -55,5 +58,11 @@ public class RestaurantMenuItem {
     public boolean isAvailable() {
         return available;
     }
+    public float getTotal() {
+        return price * quantity;
+    }
 
+    public float getQuantity() {
+        return quantity;
+    }
 }

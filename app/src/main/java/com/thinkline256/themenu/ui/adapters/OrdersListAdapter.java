@@ -4,42 +4,36 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.thinkline256.themenu.R;
-import com.thinkline256.themenu.data.models.Category;
-import com.thinkline256.themenu.ui.fragments.MenuCategoryFragment.OnListFragmentInteractionListener;
+import com.thinkline256.themenu.data.models.Order;
+import com.thinkline256.themenu.ui.fragments.OrdersListFragment.OnListFragmentInteractionListener;
 
 import java.util.List;
 
-/**
- * {@link RecyclerView.Adapter} that can display a {@link Category} and makes a call to the
- * specified {@link OnListFragmentInteractionListener}.
- */
-public class MainMenuAdapter extends RecyclerView.Adapter<MainMenuAdapter.ViewHolder> {
+public class OrdersListAdapter extends RecyclerView.Adapter<OrdersListAdapter.ViewHolder> {
 
-    private List<Category> mValues;
+    private List<Order> mOrders;
     private final OnListFragmentInteractionListener mListener;
 
-    public MainMenuAdapter(List<Category> items, OnListFragmentInteractionListener listener) {
-        mValues = items;
+    public OrdersListAdapter(List<Order> items, OnListFragmentInteractionListener listener) {
+        mOrders = items;
         mListener = listener;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.fragment_mainmenu, parent, false);
+                .inflate(R.layout.fragment_orderslist, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.mItem = mValues.get(position);
-        holder.mIdView.setText(mValues.get(position).getName());
-        holder.mContentView.setText(mValues.get(position).getDescription());
-        holder.mIcon.setImageResource(mValues.get(position).getImage());
+        holder.mItem = mOrders.get(position);
+        holder.mIdView.setText(mOrders.get(position).getOrderNUmber());
+        holder.mContentView.setText(String.valueOf(mOrders.get(position).getItems().size()));
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -52,23 +46,20 @@ public class MainMenuAdapter extends RecyclerView.Adapter<MainMenuAdapter.ViewHo
 
     @Override
     public int getItemCount() {
-        return mValues.size();
+        return mOrders.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-
         public final View mView;
         public final TextView mIdView;
         public final TextView mContentView;
-        public final ImageView mIcon;
-        public Category mItem;
+        public Order mItem;
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mIdView = (TextView) view.findViewById(R.id.id);
-            mContentView = (TextView) view.findViewById(R.id.content);
-            mIcon = view.findViewById(R.id.icon);
+            mIdView = view.findViewById(R.id.id);
+            mContentView = view.findViewById(R.id.content);
         }
 
         @Override
@@ -77,9 +68,8 @@ public class MainMenuAdapter extends RecyclerView.Adapter<MainMenuAdapter.ViewHo
         }
     }
 
-    public void updateData(List<Category> categories) {
-        mValues = categories;
+    public void updateData(List<Order> orders) {
+        mOrders = orders;
         notifyDataSetChanged();
     }
-
 }

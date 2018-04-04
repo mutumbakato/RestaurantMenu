@@ -10,8 +10,8 @@ import java.util.List;
 public class Order {
 
     private String id;
-    private String name;
-    private String itemId;
+    private String orderNUmber;
+    private String status;
     private float price;
     private List<RestaurantMenuItem> items;
 
@@ -19,19 +19,19 @@ public class Order {
 
     }
 
-    public Order(String id, String name, String itemId, float price) {
+    public Order(String id, String orderNumber, String status, float price) {
         this.id = id;
-        this.name = name;
-        this.itemId = itemId;
+        this.orderNUmber = orderNumber;
+        this.status = status;
         this.price = price;
     }
 
-    public String getName() {
-        return name;
+    public String getOrderNUmber() {
+        return orderNUmber;
     }
 
-    public String getItemId() {
-        return itemId;
+    public String getStatus() {
+        return status;
     }
 
     public float getPrice() {

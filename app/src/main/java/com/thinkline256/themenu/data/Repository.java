@@ -2,8 +2,8 @@ package com.thinkline256.themenu.data;
 
 import com.thinkline256.themenu.R;
 import com.thinkline256.themenu.data.models.Category;
-import com.thinkline256.themenu.data.models.RestaurantMenuItem;
 import com.thinkline256.themenu.data.models.Order;
+import com.thinkline256.themenu.data.models.RestaurantMenuItem;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -20,11 +20,12 @@ public class Repository implements
 
     private static Repository INSTANCE;
     private Map<String, Map<String, RestaurantMenuItem>> menuItemsCache;
+    private Map<String, RestaurantMenuItem> menu;
     private Map<String, Category> categoryCache;
     private Map<String, Order> orders;
     private Order order;
     private DataSource remoteDataSource;
-    private OrderUpdateListener mlistener;
+    private OrderUpdateListener mListener;
 
     private Repository(DataSource remoteDataSource) {
         this.remoteDataSource = remoteDataSource;
@@ -66,12 +67,34 @@ public class Repository implements
     }
 
     @Override
-    public void getMenu(String category, final ListMenuCallBacks callBacks) {
+    public void getMenu(final ListMenuCallBacks callBacks) {
+        if (menu != null && menu.size() > 0) {
+            callBacks.onLoad(new ArrayList<>(menu.values()));
+        } else {
+            remoteDataSource.getMenu(new ListMenuCallBacks() {
+                @Override
+                public void onLoad(List<RestaurantMenuItem> menu) {
+                    for (RestaurantMenuItem item : menu) {
+                        addMenuToCache(item);
+                    }
+                    callBacks.onLoad(menu);
+                }
+
+                @Override
+                public void onFail(String message) {
+                    callBacks.onFail(message);
+                }
+            });
+        }
+    }
+
+    @Override
+    public void getMenuByCategory(String category, final ListMenuCallBacks callBacks) {
         if (menuItemsCache != null && menuItemsCache.get(category) != null) {
             callBacks.onLoad(new ArrayList<>(menuItemsCache.get(category).values()));
             return;
         }
-        remoteDataSource.getMenu(category, new ListMenuCallBacks() {
+        remoteDataSource.getMenuByCategory(category, new ListMenuCallBacks() {
             @Override
             public void onLoad(List<RestaurantMenuItem> menu) {
                 for (RestaurantMenuItem item : menu) {
@@ -88,30 +111,43 @@ public class Repository implements
     }
 
     @Override
-    public void getOrders(ListOrderCallBacks callBacks) {
-
+    public void getOrders(final ListOrderCallBacks callBacks) {
+//        if (orders != null && orders.size() > 0) {
+//            callBacks.onLoad(new ArrayList<>(orders.values()));
+//        }
         remoteDataSource.getOrders(new ListOrderCallBacks() {
             @Override
             public void onLoad(List<Order> orders) {
-
+                for (Order order : orders) {
+                    addOrderToCache(order);
+                }
+                if (orders.size() > 0)
+                    callBacks.onLoad(orders);
+                else callBacks.onFail("NO orders found");
             }
 
             @Override
             public void onFail(String message) {
-
+                callBacks.onFail(message);
             }
         });
     }
 
     @Override
     public void addToOrder(RestaurantMenuItem item) {
-        if (order == null)
-            order = new Order(UUID.randomUUID().toString(), "", "", 0);
+        if (order == null) {
+            order = new Order(UUID.randomUUID().toString(), "", "normal", 1);
+        }
+
         List<RestaurantMenuItem> i = order.getItems();
-        i.add(item);
+        if (!i.contains(item)) {
+            i.add(item);
+        }
+
         order.setItems(i);
-        if (orders == null)
+        if (orders == null) {
             orders = new LinkedHashMap<>();
+        }
         orders.put(order.getId(), order);
         notifyOrder();
     }
@@ -122,11 +158,14 @@ public class Repository implements
             notifyOrder();
             return;
         }
+
         List<RestaurantMenuItem> i = order.getItems();
         i.remove(item);
         order.setItems(i);
-        if (orders == null)
+
+        if (orders == null) {
             orders = new LinkedHashMap<>();
+        }
         orders.put(order.getId(), order);
         notifyOrder();
     }
@@ -137,6 +176,7 @@ public class Repository implements
             @Override
             public void onSuccess(RestaurantMenuItem restaurantMenuItem) {
                 addMenuItemToCache(restaurantMenuItem);
+                addMenuToCache(item);
                 callback.onSuccess(item);
             }
 
@@ -149,7 +189,6 @@ public class Repository implements
 
     @Override
     public void getMenuItem(String id, String category, final MenuCallback callback) {
-
         if (menuItemsCache != null && menuItemsCache.get(category) != null) {
             callback.onSuccess(menuItemsCache.get(category).get(id));
         } else {
@@ -206,16 +245,50 @@ public class Repository implements
     public void deleteMenuItem(RestaurantMenuItem item) {
         remoteDataSource.deleteMenuItem(item);
         removeMenuItemFromCache(item);
+        removeMenuFromCache(item);
     }
 
     @Override
     public void setOrderListener(OrderUpdateListener listener) {
-        mlistener = listener;
+        mListener = listener;
     }
 
     @Override
-    public void commitCurrentOrder() {
+    public void addOrder(Order order, final OrderCallback callback) {
+        remoteDataSource.addOrder(order, new OrderCallback() {
+            @Override
+            public void onSuccess(Order order) {
+                addOrderToCache(order);
+                callback.onSuccess(order);
+            }
 
+            @Override
+            public void onFail(String message) {
+                callback.onFail(message);
+            }
+        });
+    }
+
+    @Override
+    public void deleteOrder(Order order) {
+        remoteDataSource.deleteOrder(order);
+        removeOrderFromCache(order);
+    }
+
+    @Override
+    public void commitCurrentOrder(final OrderCallback callback) {
+        addOrder(order, new OrderCallback() {
+            @Override
+            public void onSuccess(Order order) {
+                callback.onSuccess(order);
+                Repository.this.order = null;
+            }
+
+            @Override
+            public void onFail(String message) {
+                callback.onFail(message);
+            }
+        });
     }
 
     private void addCategoryToCache(Category category) {
@@ -241,6 +314,19 @@ public class Repository implements
         }
     }
 
+    private void addMenuToCache(RestaurantMenuItem item) {
+        if (menu == null)
+            menu = new LinkedHashMap<>();
+
+        menu.put(item.getId(), item);
+    }
+
+    private void removeMenuFromCache(RestaurantMenuItem item) {
+        if (menu != null) {
+            menu.remove(item.getId());
+        }
+    }
+
     private void removeCategoryFromCache(Category category) {
         if (categoryCache != null) {
             categoryCache.remove(category.getId());
@@ -262,9 +348,12 @@ public class Repository implements
     }
 
     private void notifyOrder() {
-        if (mlistener != null) {
-            mlistener.onUpdate(new ArrayList<>(orders.values()));
+        if (mListener != null) {
+            mListener.onUpdate(new ArrayList<>(orders.values()));
         }
     }
 
+    public Order getCurrentOrder() {
+        return order;
+    }
 }

@@ -8,8 +8,9 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.thinkline256.themenu.R;
+import com.thinkline256.themenu.data.models.Order;
 import com.thinkline256.themenu.data.models.RestaurantMenuItem;
-import com.thinkline256.themenu.ui.fragments.MenuItemsFragment.OnListFragmentInteractionListener;
+import com.thinkline256.themenu.ui.fragments.MenuFragment.OnListFragmentInteractionListener;
 
 import java.util.List;
 
@@ -17,10 +18,12 @@ public class MenuItemsAdapter extends RecyclerView.Adapter<MenuItemsAdapter.View
 
     private List<RestaurantMenuItem> mItems;
     private final OnListFragmentInteractionListener mListener;
+    private Order mOrder;
 
-    public MenuItemsAdapter(List<RestaurantMenuItem> items, OnListFragmentInteractionListener listener) {
+    public MenuItemsAdapter(List<RestaurantMenuItem> items, Order order, OnListFragmentInteractionListener listener) {
         mItems = items;
         mListener = listener;
+        mOrder = order;
     }
 
     @Override
@@ -36,10 +39,10 @@ public class MenuItemsAdapter extends RecyclerView.Adapter<MenuItemsAdapter.View
         holder.mNameView.setText(mItems.get(position).getName());
         holder.mPriceView.setText(com.thinkline256.themenu.utils.Currency.format(mItems.get(position).getPrice()));
         holder.mCheckBox.setChecked(mItems.get(position).isAvailable());
+        if (mOrder != null)
+            holder.isChecked = mOrder.getItems().contains(mItems.get(position));
         holder.mCheckBox.setChecked(holder.isChecked);
-        holder.mCheckBox.setClickable(false);
-        holder.mCheckBox.setFocusable(false);
-        holder.mView.setOnClickListener(new View.OnClickListener() {
+        holder.mCheckBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (null != mListener) {
@@ -57,11 +60,12 @@ public class MenuItemsAdapter extends RecyclerView.Adapter<MenuItemsAdapter.View
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
+
         public final View mView;
         public final TextView mNameView;
         public final TextView mPriceView;
-        public RestaurantMenuItem mItem;
         public final CheckBox mCheckBox;
+        public RestaurantMenuItem mItem;
         public boolean isChecked = false;
 
         public ViewHolder(View view) {
@@ -82,4 +86,5 @@ public class MenuItemsAdapter extends RecyclerView.Adapter<MenuItemsAdapter.View
         mItems = items;
         notifyDataSetChanged();
     }
+
 }

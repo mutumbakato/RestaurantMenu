@@ -2,51 +2,43 @@ package com.thinkline256.themenu.ui.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.thinkline256.themenu.R;
 import com.thinkline256.themenu.data.DataSource;
-import com.thinkline256.themenu.data.Repository;
 import com.thinkline256.themenu.data.DataUtils;
+import com.thinkline256.themenu.data.Repository;
 import com.thinkline256.themenu.data.models.RestaurantMenuItem;
-import com.thinkline256.themenu.ui.adapters.MenuItemsAdapter;
+import com.thinkline256.themenu.ui.adapters.MenuListAdapter;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
-public class MenuItemsFragment extends Fragment implements DataSource.ListMenuCallBacks {
+public class MenuListFragment extends Fragment implements DataSource.ListMenuCallBacks {
 
-    public static final String ARG_TITLE = "title";
-    public static final String ARG_CATEGORY_ID = "category_id";
     private OnListFragmentInteractionListener mListener;
-
-    private TextView vTitle;
-    private String mTitle;
-    private String mCategoryId;
-    private MenuItemsAdapter adapter;
+    private MenuListAdapter adapter;
     private Repository repository;
 
-    /**
-     * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
-     */
-    public MenuItemsFragment() {
+    private TextView errorTextView;
+    private ProgressBar progress;
 
+    public MenuListFragment() {
     }
 
     @SuppressWarnings("unused")
-    public static MenuItemsFragment newInstance(String id, String title) {
-        MenuItemsFragment fragment = new MenuItemsFragment();
+    public static MenuListFragment newInstance() {
+        MenuListFragment fragment = new MenuListFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_CATEGORY_ID, id);
-        args.putString(ARG_TITLE, title);
         fragment.setArguments(args);
         return fragment;
     }
@@ -54,25 +46,23 @@ public class MenuItemsFragment extends Fragment implements DataSource.ListMenuCa
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mCategoryId = getArguments().getString(ARG_CATEGORY_ID);
-            mTitle = getArguments().getString(ARG_TITLE);
-        }
-        adapter = new MenuItemsAdapter(new ArrayList<RestaurantMenuItem>(), mListener);
         repository = DataUtils.getRepository();
+        adapter = new MenuListAdapter(new ArrayList<RestaurantMenuItem>(), mListener);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_menuitems_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_menulist_list, container, false);
         // Set the adapter
         Context context = view.getContext();
+
         RecyclerView recyclerView = view.findViewById(R.id.list);
-        vTitle = view.findViewById(R.id.sub_menu_title);
-        vTitle.setText(mTitle);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
         recyclerView.setAdapter(adapter);
+
+        errorTextView = view.findViewById(R.id.error_message);
+        progress = view.findViewById(R.id.menu_progress);
         return view;
     }
 
@@ -96,21 +86,30 @@ public class MenuItemsFragment extends Fragment implements DataSource.ListMenuCa
     @Override
     public void onResume() {
         super.onResume();
-        repository.getMenu(mCategoryId, this);
+        repository.getMenu(this);
     }
 
     @Override
     public void onLoad(List<RestaurantMenuItem> menu) {
+        progress.setVisibility(View.GONE);
+        errorTextView.setVisibility(View.GONE);
+        Collections.sort(menu, new Comparator<RestaurantMenuItem>() {
+            @Override
+            public int compare(RestaurantMenuItem item, RestaurantMenuItem t1) {
+                return item.getName().compareTo(t1.getName());
+            }
+        });
         adapter.updateData(menu);
     }
 
     @Override
     public void onFail(String message) {
-        Snackbar.make(getView(), message, Snackbar.LENGTH_LONG).show();
+        progress.setVisibility(View.GONE);
+        errorTextView.setVisibility(View.VISIBLE);
+        errorTextView.setText(message);
     }
 
     public interface OnListFragmentInteractionListener {
-        void onListFragmentInteraction(RestaurantMenuItem item, boolean isChecked);
+        void onListFragmentInteraction(RestaurantMenuItem item);
     }
-
 }

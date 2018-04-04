@@ -12,8 +12,15 @@ import java.util.List;
 
 public interface DataSource {
 
+    interface OrderCallback {
+
+        void onSuccess(Order order);
+
+        void onFail(String message);
+    }
+
     interface MenuCallback {
-        void onSuccess(RestaurantMenuItem restaurantMenuItem);
+        void onSuccess(RestaurantMenuItem item);
 
         void onFail(String message);
     }
@@ -48,7 +55,9 @@ public interface DataSource {
 
     void getCategories(ListCategoriesCallBacks callBacks);
 
-    void getMenu(String category, ListMenuCallBacks callBacks);
+    void getMenu(ListMenuCallBacks callBacks);
+
+    void getMenuByCategory(String category, ListMenuCallBacks callBacks);
 
     void getOrders(ListOrderCallBacks callBacks);
 
@@ -72,6 +81,10 @@ public interface DataSource {
 
     void setOrderListener(OrderUpdateListener listener);
 
-    void commitCurrentOrder();
+    void addOrder(Order order, OrderCallback callback);
+
+    void deleteOrder(Order order);
+
+    void commitCurrentOrder(OrderCallback callback);
 
 }

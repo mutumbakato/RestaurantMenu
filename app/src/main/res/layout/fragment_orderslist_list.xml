@@ -3,34 +3,18 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:name="com.thinkline256.themenu.ui.MenuItemsFragment"
+    android:name="com.thinkline256.themenu.ui.fragments.OrdersListFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorDark"
     android:orientation="vertical"
-    app:layoutManager="LinearLayoutManager"
-    tools:context="com.thinkline256.themenu.ui.fragments.MenuFragment">
+    tools:context="com.thinkline256.themenu.ui.fragments.OrdersListFragment">
 
     <ProgressBar
-        android:id="@+id/menu_progress"
+        android:id="@+id/order_progress"
         style="@style/Widget.AppCompat.ProgressBar.Horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:indeterminate="true"/>
-
-    <TextView
-        android:id="@+id/sub_menu_title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:maxLines="1"
-        android:paddingLeft="16dp"
-        android:paddingStart="16dp"
-        android:paddingTop="8dp"
-        android:text="Today's Menu"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
-        android:textSize="40sp"
-        tools:ignore="RtlSymmetry"/>
 
     <TextView
         android:id="@+id/error_message"
@@ -43,11 +27,11 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
-        android:layout_marginStart="16dp"
-        tools:listitem="@layout/fragment_menuitems">
+        android:layout_marginRight="16dp"
+        app:layoutManager="LinearLayoutManager"
+        tools:listitem="@layout/fragment_orderslist">
 
     </android.support.v7.widget.RecyclerView>
-
 </LinearLayout>

@@ -2,51 +2,41 @@ package com.thinkline256.themenu.ui.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.thinkline256.themenu.R;
 import com.thinkline256.themenu.data.DataSource;
-import com.thinkline256.themenu.data.Repository;
 import com.thinkline256.themenu.data.DataUtils;
-import com.thinkline256.themenu.data.models.Category;
-import com.thinkline256.themenu.ui.adapters.MainMenuAdapter;
+import com.thinkline256.themenu.data.Repository;
+import com.thinkline256.themenu.data.models.Order;
+import com.thinkline256.themenu.ui.adapters.OrdersListAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A fragment representing a list of Items.
- * <p/>
- * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
- * interface.
- */
-public class MainMenuFragment extends Fragment implements DataSource.ListCategoriesCallBacks {
+public class OrdersListFragment extends Fragment implements DataSource.ListOrderCallBacks {
 
-    private static final String ARG_COLUMN_COUNT = "column-count";
     private OnListFragmentInteractionListener mListener;
-    private MainMenuAdapter adapter;
-    private Repository repo;
+    private OrdersListAdapter adapter;
+    private Repository repository;
+    private ProgressBar progress;
+    private TextView errorTextView;
 
-    /**
-     * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
-     */
-
-    public MainMenuFragment() {
+    public OrdersListFragment() {
 
     }
 
     @SuppressWarnings("unused")
-    public static MainMenuFragment newInstance(int columnCount) {
-        MainMenuFragment fragment = new MainMenuFragment();
+    public static OrdersListFragment newInstance() {
+        OrdersListFragment fragment = new OrdersListFragment();
         Bundle args = new Bundle();
-        args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);
         return fragment;
     }
@@ -54,27 +44,25 @@ public class MainMenuFragment extends Fragment implements DataSource.ListCategor
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        adapter = new MainMenuAdapter(new ArrayList<Category>(), mListener);
-        repo = DataUtils.getRepository();
+        adapter = new OrdersListAdapter(new ArrayList<Order>(), mListener);
+        repository = DataUtils.getRepository();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_mainmenu_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_orderslist_list, container, false);
+
         // Set the adapter
         Context context = view.getContext();
         RecyclerView recyclerView = view.findViewById(R.id.list);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        recyclerView.setAdapter(adapter);
-        return view;
-    }
+        recyclerView.setAdapter(new OrdersListAdapter(new ArrayList<Order>(), mListener));
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        repo.getCategories(this);
+        errorTextView = view.findViewById(R.id.error_message);
+        progress = view.findViewById(R.id.order_progress);
+        return view;
     }
 
     @Override
@@ -95,16 +83,26 @@ public class MainMenuFragment extends Fragment implements DataSource.ListCategor
     }
 
     @Override
-    public void onLoad(List<Category> categories) {
-        adapter.updateData(categories);
+    public void onResume() {
+        super.onResume();
+        repository.getOrders(this);
+    }
+
+    @Override
+    public void onLoad(List<Order> orders) {
+        progress.setVisibility(View.GONE);
+        errorTextView.setVisibility(View.GONE);
+        adapter.updateData(orders);
     }
 
     @Override
     public void onFail(String message) {
-        Snackbar.make(getView(), message, Snackbar.LENGTH_LONG).show();
+        progress.setVisibility(View.GONE);
+        errorTextView.setVisibility(View.VISIBLE);
+        errorTextView.setText(message);
     }
 
     public interface OnListFragmentInteractionListener {
-        void onListFragmentInteraction(Category item);
+        void onListFragmentInteraction(Order item);
     }
 }

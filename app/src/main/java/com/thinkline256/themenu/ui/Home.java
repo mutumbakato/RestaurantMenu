@@ -21,18 +21,19 @@ import com.thinkline256.themenu.data.DataUtils;
 import com.thinkline256.themenu.data.Repository;
 import com.thinkline256.themenu.data.models.Category;
 import com.thinkline256.themenu.data.models.RestaurantMenuItem;
-import com.thinkline256.themenu.ui.fragments.MainMenuFragment;
-import com.thinkline256.themenu.ui.fragments.MenuItemsFragment;
+import com.thinkline256.themenu.ui.fragments.MenuCategoryFragment;
+import com.thinkline256.themenu.ui.fragments.MenuFragment;
 import com.thinkline256.themenu.ui.fragments.OrderFragment;
 
 public class Home extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener,
-        MainMenuFragment.OnListFragmentInteractionListener,
-        MenuItemsFragment.OnListFragmentInteractionListener,
+        MenuCategoryFragment.OnListFragmentInteractionListener,
+        MenuFragment.OnListFragmentInteractionListener,
         OrderFragment.OnFragmentInteractionListener {
 
     private BottomSheetBehavior orderView;
     private Repository repository;
+    private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,26 +63,21 @@ public class Home extends AppCompatActivity implements
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
         findViewById(R.id.order_frame).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 orderView.setState(BottomSheetBehavior.STATE_EXPANDED);
             }
         });
+    }
 
-        orderView.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-            @Override
-            public void onStateChanged(@NonNull View bottomSheet, int newState) {
-
-            }
-
-            @Override
-            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-
-            }
-        });
+    @Override
+    protected void onResume() {
+        super.onResume();
+        navigationView.setCheckedItem(R.id.nav_menu);
     }
 
     @Override
@@ -121,11 +117,9 @@ public class Home extends AppCompatActivity implements
         // Handle navigation view item clicks here.
         int id = item.getItemId();
         if (id == R.id.nav_menu) {
-
         } else if (id == R.id.nav_dashboard) {
             DashBoard.start(this);
         }
-
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
@@ -135,7 +129,7 @@ public class Home extends AppCompatActivity implements
     public void onListFragmentInteraction(Category item) {
         getSupportFragmentManager()
                 .beginTransaction()
-                .add(R.id.menu_frame, MenuItemsFragment.newInstance(item.getId(), item.getName()))
+                .add(R.id.menu_frame, MenuFragment.newInstance(item.getId(), item.getName()))
                 .addToBackStack("")
                 .commit();
     }
