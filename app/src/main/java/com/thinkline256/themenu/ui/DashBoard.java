@@ -18,10 +18,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.thinkline256.themenu.R;
+import com.thinkline256.themenu.data.models.Order;
 import com.thinkline256.themenu.data.models.RestaurantMenuItem;
 import com.thinkline256.themenu.ui.fragments.MenuListFragment;
+import com.thinkline256.themenu.ui.fragments.OrdersListFragment;
 
-public class DashBoard extends AppCompatActivity implements MenuListFragment.OnListFragmentInteractionListener {
+public class DashBoard extends AppCompatActivity
+        implements MenuListFragment.OnListFragmentInteractionListener
+        , OrdersListFragment.OnListFragmentInteractionListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +71,11 @@ public class DashBoard extends AppCompatActivity implements MenuListFragment.OnL
     @Override
     public void onListFragmentInteraction(RestaurantMenuItem item) {
         MenuFormActivity.start(this, item.getId(), item.getCategory());
+    }
+
+    @Override
+    public void onListFragmentInteraction(Order item) {
+
     }
 
     /**
@@ -116,10 +125,12 @@ public class DashBoard extends AppCompatActivity implements MenuListFragment.OnL
 
         @Override
         public Fragment getItem(int position) {
-            switch (position){
+            switch (position) {
                 case 0:
-                    return PlaceholderFragment.newInstance(position + 1);
+                    return OrdersListFragment.newInstance("Pending");
                 case 1:
+                    return OrdersListFragment.newInstance("Delivered");
+                case 2:
                     return MenuListFragment.newInstance();
             }
             return PlaceholderFragment.newInstance(position + 1);
@@ -128,7 +139,7 @@ public class DashBoard extends AppCompatActivity implements MenuListFragment.OnL
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 2;
+            return 3;
         }
     }
 

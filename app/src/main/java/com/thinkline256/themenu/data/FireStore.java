@@ -1,12 +1,16 @@
 package com.thinkline256.themenu.data;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.thinkline256.themenu.data.models.Category;
@@ -20,6 +24,7 @@ public class FireStore implements DataSource {
 
     private CollectionReference menuDb = FirebaseFirestore.getInstance().collection("menu");
     private CollectionReference ordersDb = FirebaseFirestore.getInstance().collection("orders");
+    private ListenerRegistration registration;
 
     @Override
     public void getCategories(ListCategoriesCallBacks callBacks) {
@@ -36,12 +41,11 @@ public class FireStore implements DataSource {
                     for (QueryDocumentSnapshot data : task.getResult()) {
                         menu.add(data.toObject(RestaurantMenuItem.class));
                     }
-
-                    if (menu.size() > 0)
+                    if (menu.size() > 0) {
                         callBacks.onLoad(menu);
-                    else
+                    } else {
                         callBacks.onFail("No items found!");
-
+                    }
                 } else {
                     callBacks.onFail("No items found!");
                 }
@@ -71,8 +75,8 @@ public class FireStore implements DataSource {
     }
 
     @Override
-    public void getOrders(final ListOrderCallBacks callBacks) {
-        ordersDb.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+    public void getOrders(String status, final ListOrderCallBacks callBacks) {
+        ordersDb.whereEqualTo("status", status).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
@@ -80,10 +84,11 @@ public class FireStore implements DataSource {
                     for (QueryDocumentSnapshot data : task.getResult()) {
                         orders.add(data.toObject(Order.class));
                     }
-                    if (orders.size() > 0)
+                    if (orders.size() > 0) {
                         callBacks.onLoad(orders);
-                    else
+                    } else {
                         callBacks.onFail("No orders found!");
+                    }
                 } else {
                     callBacks.onFail("No orders found");
                 }
@@ -179,5 +184,29 @@ public class FireStore implements DataSource {
     @Override
     public void commitCurrentOrder(OrderCallback callback) {
         //Implemented in the repository
+    }
+
+    @Override
+    public void setNewOrderListener(final OrdersListener listener) {
+        if (listener == null) {
+            if (registration != null) {
+                registration.remove();
+            }
+            return;
+        }
+        registration = ordersDb.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(QuerySnapshot queryDocumentSnapshots, FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w("FireStore", "Listen failed.", e);
+                    return;
+                }
+                List<Order> orders = new ArrayList<>();
+                for (QueryDocumentSnapshot data : queryDocumentSnapshots) {
+                    orders.add(data.toObject(Order.class));
+                }
+                listener.onOrdersUpdated(orders);
+            }
+        });
     }
 }

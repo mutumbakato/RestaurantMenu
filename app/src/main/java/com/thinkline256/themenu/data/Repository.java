@@ -1,11 +1,14 @@
 package com.thinkline256.themenu.data;
 
+import android.support.annotation.Nullable;
+
 import com.thinkline256.themenu.R;
 import com.thinkline256.themenu.data.models.Category;
 import com.thinkline256.themenu.data.models.Order;
 import com.thinkline256.themenu.data.models.RestaurantMenuItem;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,14 +18,13 @@ import java.util.UUID;
  * Created by cato on 3/27/18.
  */
 
-public class Repository implements
-        DataSource {
+public class Repository implements DataSource {
 
     private static Repository INSTANCE;
     private Map<String, Map<String, RestaurantMenuItem>> menuItemsCache;
     private Map<String, RestaurantMenuItem> menu;
     private Map<String, Category> categoryCache;
-    private Map<String, Order> orders;
+
     private Order order;
     private DataSource remoteDataSource;
     private OrderUpdateListener mListener;
@@ -46,10 +48,12 @@ public class Repository implements
 
     @Override
     public void getCategories(final ListCategoriesCallBacks callBacks) {
+
         if (categoryCache != null && categoryCache.size() > 0) {
             callBacks.onLoad(new ArrayList<>(categoryCache.values()));
             return;
         }
+
         remoteDataSource.getCategories(new ListCategoriesCallBacks() {
             @Override
             public void onLoad(List<Category> categories) {
@@ -111,19 +115,13 @@ public class Repository implements
     }
 
     @Override
-    public void getOrders(final ListOrderCallBacks callBacks) {
-//        if (orders != null && orders.size() > 0) {
-//            callBacks.onLoad(new ArrayList<>(orders.values()));
-//        }
-        remoteDataSource.getOrders(new ListOrderCallBacks() {
+    public void getOrders(String status, final ListOrderCallBacks callBacks) {
+        remoteDataSource.getOrders(status, new ListOrderCallBacks() {
             @Override
             public void onLoad(List<Order> orders) {
-                for (Order order : orders) {
-                    addOrderToCache(order);
-                }
-                if (orders.size() > 0)
+                if (orders.size() > 0) {
                     callBacks.onLoad(orders);
-                else callBacks.onFail("NO orders found");
+                } else callBacks.onFail("NO orders found");
             }
 
             @Override
@@ -136,19 +134,13 @@ public class Repository implements
     @Override
     public void addToOrder(RestaurantMenuItem item) {
         if (order == null) {
-            order = new Order(UUID.randomUUID().toString(), "", "normal", 1);
+            order = new Order(UUID.randomUUID().toString(), "", "Pending", 0);
         }
-
         List<RestaurantMenuItem> i = order.getItems();
         if (!i.contains(item)) {
             i.add(item);
         }
-
         order.setItems(i);
-        if (orders == null) {
-            orders = new LinkedHashMap<>();
-        }
-        orders.put(order.getId(), order);
         notifyOrder();
     }
 
@@ -158,20 +150,15 @@ public class Repository implements
             notifyOrder();
             return;
         }
-
         List<RestaurantMenuItem> i = order.getItems();
         i.remove(item);
         order.setItems(i);
-
-        if (orders == null) {
-            orders = new LinkedHashMap<>();
-        }
-        orders.put(order.getId(), order);
         notifyOrder();
     }
 
     @Override
     public void addMenuItem(final RestaurantMenuItem item, final MenuCallback callback) {
+
         remoteDataSource.addMenuItem(item, new MenuCallback() {
             @Override
             public void onSuccess(RestaurantMenuItem restaurantMenuItem) {
@@ -249,7 +236,7 @@ public class Repository implements
     }
 
     @Override
-    public void setOrderListener(OrderUpdateListener listener) {
+    public void setOrderListener(@Nullable OrderUpdateListener listener) {
         mListener = listener;
     }
 
@@ -258,7 +245,6 @@ public class Repository implements
         remoteDataSource.addOrder(order, new OrderCallback() {
             @Override
             public void onSuccess(Order order) {
-                addOrderToCache(order);
                 callback.onSuccess(order);
             }
 
@@ -272,16 +258,17 @@ public class Repository implements
     @Override
     public void deleteOrder(Order order) {
         remoteDataSource.deleteOrder(order);
-        removeOrderFromCache(order);
     }
 
     @Override
     public void commitCurrentOrder(final OrderCallback callback) {
+        order.setTime(Calendar.getInstance().getTimeInMillis());
         addOrder(order, new OrderCallback() {
             @Override
             public void onSuccess(Order order) {
                 callback.onSuccess(order);
                 Repository.this.order = null;
+                mListener.onUpdate(null);
             }
 
             @Override
@@ -289,6 +276,11 @@ public class Repository implements
                 callback.onFail(message);
             }
         });
+    }
+
+    @Override
+    public void setNewOrderListener(OrdersListener listener) {
+        remoteDataSource.setNewOrderListener(listener);
     }
 
     private void addCategoryToCache(Category category) {
@@ -317,7 +309,6 @@ public class Repository implements
     private void addMenuToCache(RestaurantMenuItem item) {
         if (menu == null)
             menu = new LinkedHashMap<>();
-
         menu.put(item.getId(), item);
     }
 
@@ -333,23 +324,9 @@ public class Repository implements
         }
     }
 
-    private void addOrderToCache(Order item) {
-        if (order == null) {
-            orders.put(item.getId(), item);
-        }
-        notifyOrder();
-    }
-
-    private void removeOrderFromCache(Order item) {
-        if (order != null) {
-            orders.remove(item.getId());
-        }
-        notifyOrder();
-    }
-
     private void notifyOrder() {
         if (mListener != null) {
-            mListener.onUpdate(new ArrayList<>(orders.values()));
+            mListener.onUpdate(order);
         }
     }
 

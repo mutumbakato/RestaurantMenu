@@ -1,5 +1,7 @@
 package com.thinkline256.themenu.data.models;
 
+import com.google.firebase.firestore.Exclude;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,18 +14,17 @@ public class Order {
     private String id;
     private String orderNUmber;
     private String status;
-    private float price;
+    private long time;
     private List<RestaurantMenuItem> items;
 
     public Order() {
-
     }
 
-    public Order(String id, String orderNumber, String status, float price) {
+    public Order(String id, String orderNumber, String status, long time) {
         this.id = id;
         this.orderNUmber = orderNumber;
         this.status = status;
-        this.price = price;
+        this.time = time;
     }
 
     public String getOrderNUmber() {
@@ -34,8 +35,17 @@ public class Order {
         return status;
     }
 
-    public float getPrice() {
-        return price;
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    @Exclude
+    public float getTotalCost() {
+        float total = 0;
+        for (RestaurantMenuItem item : getItems()) {
+            total += item.getTotal();
+        }
+        return total;
     }
 
     public String getId() {
@@ -48,7 +58,15 @@ public class Order {
         return items;
     }
 
+    public void setTime(long time) {
+        this.time = time;
+    }
+
     public void setItems(List<RestaurantMenuItem> items) {
         this.items = items;
+    }
+
+    public long getTime() {
+        return time;
     }
 }

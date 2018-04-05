@@ -50,7 +50,11 @@ public interface DataSource {
     }
 
     interface OrderUpdateListener {
-        void onUpdate(List<Order> orders);
+        void onUpdate(Order orders);
+    }
+
+    interface OrdersListener {
+        void onOrdersUpdated(List<Order> orders);
     }
 
     void getCategories(ListCategoriesCallBacks callBacks);
@@ -59,7 +63,7 @@ public interface DataSource {
 
     void getMenuByCategory(String category, ListMenuCallBacks callBacks);
 
-    void getOrders(ListOrderCallBacks callBacks);
+    void getOrders(String status, ListOrderCallBacks callBacks);
 
     void addToOrder(RestaurantMenuItem item);
 
@@ -86,5 +90,7 @@ public interface DataSource {
     void deleteOrder(Order order);
 
     void commitCurrentOrder(OrderCallback callback);
+
+    void setNewOrderListener(OrdersListener listener);
 
 }

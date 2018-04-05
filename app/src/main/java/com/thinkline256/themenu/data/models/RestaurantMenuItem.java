@@ -13,7 +13,7 @@ public class RestaurantMenuItem {
     private String type;
     private float price;
     private boolean available;
-    private float quantity;
+    private float quantity = 1;
 
     public RestaurantMenuItem() {
 
@@ -58,6 +58,7 @@ public class RestaurantMenuItem {
     public boolean isAvailable() {
         return available;
     }
+
     public float getTotal() {
         return price * quantity;
     }

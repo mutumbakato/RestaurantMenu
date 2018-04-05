@@ -21,22 +21,24 @@ import com.thinkline256.themenu.ui.adapters.OrdersListAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OrdersListFragment extends Fragment implements DataSource.ListOrderCallBacks {
+public class OrdersListFragment extends Fragment implements DataSource.ListOrderCallBacks, DataSource.OrdersListener {
 
     private OnListFragmentInteractionListener mListener;
     private OrdersListAdapter adapter;
     private Repository repository;
     private ProgressBar progress;
     private TextView errorTextView;
+    private String mStatus;
 
     public OrdersListFragment() {
 
     }
 
     @SuppressWarnings("unused")
-    public static OrdersListFragment newInstance() {
+    public static OrdersListFragment newInstance(String status) {
         OrdersListFragment fragment = new OrdersListFragment();
         Bundle args = new Bundle();
+        args.putString("status", status);
         fragment.setArguments(args);
         return fragment;
     }
@@ -46,6 +48,10 @@ public class OrdersListFragment extends Fragment implements DataSource.ListOrder
         super.onCreate(savedInstanceState);
         adapter = new OrdersListAdapter(new ArrayList<Order>(), mListener);
         repository = DataUtils.getRepository();
+
+        if (!getArguments().isEmpty()) {
+            mStatus = getArguments().getString("status");
+        }
     }
 
     @Override
@@ -58,7 +64,7 @@ public class OrdersListFragment extends Fragment implements DataSource.ListOrder
         RecyclerView recyclerView = view.findViewById(R.id.list);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        recyclerView.setAdapter(new OrdersListAdapter(new ArrayList<Order>(), mListener));
+        recyclerView.setAdapter(adapter);
 
         errorTextView = view.findViewById(R.id.error_message);
         progress = view.findViewById(R.id.order_progress);
@@ -80,12 +86,14 @@ public class OrdersListFragment extends Fragment implements DataSource.ListOrder
     public void onDetach() {
         super.onDetach();
         mListener = null;
+        repository.setNewOrderListener(null);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        repository.getOrders(this);
+        repository.setNewOrderListener(this);
+        repository.getOrders(mStatus, this);
     }
 
     @Override
@@ -100,6 +108,11 @@ public class OrdersListFragment extends Fragment implements DataSource.ListOrder
         progress.setVisibility(View.GONE);
         errorTextView.setVisibility(View.VISIBLE);
         errorTextView.setText(message);
+    }
+
+    @Override
+    public void onOrdersUpdated(List<Order> orders) {
+        repository.getOrders(mStatus, this);
     }
 
     public interface OnListFragmentInteractionListener {

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.thinkline256.themenu">
+
     <application
         android:name=".App"
         android:allowBackup="false"
@@ -15,10 +16,10 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
+
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ui.DashBoard"
             android:label="@string/title_activity_dash_board"
@@ -29,5 +30,12 @@
             android:label="@string/title_activity_menu_form"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
+
+        <service
+            android:name=".services.OrderService"
+            android:enabled="true"
+            android:exported="true">
+        </service>
     </application>
+
 </manifest>

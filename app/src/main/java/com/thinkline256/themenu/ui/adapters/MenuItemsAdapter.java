@@ -82,8 +82,9 @@ public class MenuItemsAdapter extends RecyclerView.Adapter<MenuItemsAdapter.View
         }
     }
 
-    public void updateData(List<RestaurantMenuItem> items) {
+    public void updateData(List<RestaurantMenuItem> items, Order order) {
         mItems = items;
+        mOrder = order;
         notifyDataSetChanged();
     }
 

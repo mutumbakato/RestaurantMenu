@@ -116,10 +116,12 @@ public class Home extends AppCompatActivity implements
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
+
         if (id == R.id.nav_menu) {
         } else if (id == R.id.nav_dashboard) {
             DashBoard.start(this);
         }
+
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
@@ -146,6 +148,6 @@ public class Home extends AppCompatActivity implements
 
     @Override
     public void onFragmentInteraction(Uri uri) {
-
+        orderView.setState(BottomSheetBehavior.STATE_COLLAPSED);
     }
 }

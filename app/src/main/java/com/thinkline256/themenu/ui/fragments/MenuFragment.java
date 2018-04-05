@@ -119,7 +119,7 @@ public class MenuFragment extends Fragment implements DataSource.ListMenuCallBac
                 return item.getName().compareTo(t1.getName());
             }
         });
-        adapter.updateData(menu);
+        adapter.updateData(menu, repository.getCurrentOrder());
     }
 
     @Override
